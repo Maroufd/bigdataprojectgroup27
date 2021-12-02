@@ -43,8 +43,9 @@ def performExploratoryAnalysis(df):
   f.close()
 
   #Exploration of the variables
-
-  #Numerical
+            
+  #Numerical            
+  categorical = ["Year", "Month", "DayofMonth", "TailNum", "UniqueCarrier", "Origin", "Dest"]
   numerical = df.drop(*categorical)
   for col in numerical:
     desc = numerical.describe(col)
