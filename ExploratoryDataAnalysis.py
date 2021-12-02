@@ -20,7 +20,7 @@ def write_table(table, name_of_file):
   f.close()
 
 def write_correlations(table, variable, name_of_file):
-  '''Writes a correlations between variable and the rest of the columns of a dataframe in a .txt
+  '''Writes the correlations between variable and the rest of the columns of a dataframe in a .txt
   Input: dataframe, string with the name of the variable and string with the name of the file'''
 
   with open(name_of_file,'a') as f:
