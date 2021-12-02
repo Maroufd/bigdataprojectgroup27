@@ -29,8 +29,11 @@ def write_correlations(table, variable, name_of_file):
       f.write("Correlation to " + variable + " for " + col + ": " + str(table.stat.corr(variable, col)) + '\r\n')
   f.close()
 
-def main(df):
-
+def performExploratoryAnalysis(df):
+  '''Performs an exploratory data analysis of df
+  Input: dataframe
+  Output: data_exploration.txt'''
+            
   #Exploration of the data base
   with open('data_exploration.txt','w') as f:
     f.write("DATA EXPLORATION" + '\r\n\r\n')
@@ -59,6 +62,3 @@ def main(df):
   #Correlations
   write_correlations(numerical, "ArrDelay", 'data_exploration.txt')
 
-
-if __name__ == "__main__":
-  main(df)
