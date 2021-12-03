@@ -43,15 +43,24 @@ def run_application(config, *, seed=69, verbose=False):
     df=preprocessing.categoricalToNumerical(df)
 
     #Modeling
+    df=preprocessing.create_features_vector(df,model)
+    df_features = df.select(["features", "ArrDelay"])
 
-    if config.model=="MultipleLinearRegression":
-        lr_model,trainingSummary, test_result=models.LinearRegressionmodel(train_set,test_set)
+    train_set,test_set=preprocessing.split_set(df_features,trainsize,testsize)
 
-    statistics.print_linear_regression_summary(lr_model)
+    if model=="RegularizedLinearRegression":
+      trained_model, train_predictions, test_predictions = models.select_RegularizedLinearRegressionModel(train_set,test_set)
+      statistics.print_linear_regression_summary(trained_model)
 
-    statistics.print_training_summary(trainingSummary)
+    else if model=="DecisionTreeRegression":
+      trained_model, train_predictions, test_predictions = models.select_DecisionTreeRegressionModel(train_set,test_set)
 
-    statistics.print_test_summary(test_result)
+    else:
+      trained_model, train_predictions, test_predictions = models.LinearRegressionModel(train_set,test_set)
+      statistics.print_linear_regression_summary(trained_model)
+
+    statistics.print_training_summary(train_predictions)
+    statistics.print_test_summary(test_predictions)
 
 if __name__ == "__main__":
     
