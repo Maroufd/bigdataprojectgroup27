@@ -24,7 +24,7 @@ def write_correlations(table, variable, name_of_file):
   Input: dataframe, string with the name of the variable and string with the name of the file'''
 
   with open(name_of_file,'a') as f:
-    f.write("Correlations:\r\n')
+    f.write("Correlations:\r\n")
     for col in table.columns:
       f.write("Correlation to " + variable + " for " + col + ": " + str(table.stat.corr(variable, col)) + '\r\n')
   f.close()
@@ -33,7 +33,7 @@ def performExploratoryAnalysis(df):
   '''Performs an exploratory data analysis of df
   Input: dataframe
   Output: data_exploration.txt'''
-            
+
   #Exploration of the data base
   with open('data_exploration.txt','w') as f:
     f.write("DATA EXPLORATION" + '\r\n\r\n')
@@ -43,8 +43,8 @@ def performExploratoryAnalysis(df):
   f.close()
 
   #Exploration of the variables
-            
-  #Numerical            
+
+  #Numerical
   categorical = ["Year", "Month", "DayofMonth", "TailNum", "UniqueCarrier", "Origin", "Dest"]
   numerical = df.drop(*categorical)
   for col in numerical:
@@ -62,4 +62,3 @@ def performExploratoryAnalysis(df):
 
   #Correlations
   write_correlations(numerical, "ArrDelay", 'data_exploration.txt')
-

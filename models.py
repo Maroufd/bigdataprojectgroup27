@@ -47,7 +47,6 @@ def select_RegularizedLinearRegressionModel(train_set, test_set):
 
   train_predictions = lr_cv_bestmodel.transform(train_set)
   test_predictions = lr_cv_bestmodel.transform(train_set)
-
   return lr_cv_bestmodel, train_predictions, test_predictions
 
 

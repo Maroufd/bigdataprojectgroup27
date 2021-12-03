@@ -12,14 +12,14 @@ from pyspark.ml.feature import VectorAssembler
 
 def day_of_year(date):
     '''Converts a variable with format 'dd-mm-YYYY' to a number in [1, 365]'''
-    
+
     return datetime.timetuple(datetime.combine(date, datetime.min.time())).tm_yday
 
 def date_preprocess(df):
     '''Convert the variables Year Month and DayofMonth into a number in [0, 365] representing the day of the year
     Input: dataframe
     Output: dataframe'''
-    
+
     df = df.withColumn("Date", concat_ws('-',df.Year,df.Month,df.DayofMonth))
     dayOfYear = udf(day_of_year, returnType=IntegerType())
     df = df.withColumn("Date", to_date(df["Date"]))
@@ -31,28 +31,34 @@ def filter_null(df):
     '''Treatment of nulls
     Input: dataframe
     Output: dataframe'''
-    
+
     #If there is nulls in target variable (ArrDelay)
-    df = df.na.drop(subset=["ArrDelay"]) 
+    df = df.na.drop(subset=["ArrDelay"])
 
     #For numerical: mean
     #Fill nulls with mean value of the column excluding variables on list categorical
-    stats = df.agg(*(avg(c).alias(c) for c in df.columns if c not in categorical))
-    withoutNulls = df.na.fill(stats.first().asDict())
+    categorical = ["TailNum", "UniqueCarrier", "Origin", "Dest"]
+    #stats = df.agg(*(avg(c).alias(c) for c in df.columns if c not in categorical))
+    #withoutNulls = df.na.fill(stats.first().asDict())
 
     #For categorical: most common
     for c in categorical:
-      frec = df.groupBy(c).count().orderBy('count', ascending=False)
-      mode = frec.first()[c]
-      df = df.na.fill(value=mode,subset=[c])
-    
+        print(c)
+        frec = df.groupBy(c).count()
+        print(frec)
+        frec= frec.orderBy('count', ascending=False)
+        frec.show()
+        mode = frec.first()[c]
+        print(mode)
+        df = df.na.fill(value=mode,subset=[c])
+
     return df
 
 def categoricalToNumerical(df):
     '''Convert categorical variables to integer
     Input: dataframe
     Outpu: dataframe'''
-        
+
     categorical = ["TailNum", "UniqueCarrier", "Origin", "Dest"]
     indexers = [StringIndexer(inputCol=c, outputCol=c+"_index").fit(df) for c in df.columns if c in categorical]
     pipeline = Pipeline(stages=indexers)
@@ -66,7 +72,7 @@ def create_features_vector(df, modelSelected):
       vectorAssembler = VectorAssembler(inputCols = ["DepDelay"], outputCol = "features")
       df = vectorAssembler.transform(df)
 
-    else if modelSelected == "MultipleLinearRegressionInteraction":
+    elif modelSelected == "MultipleLinearRegressionInteraction":
       df = df.withColumn("DepDelay_TaxiOut", df["DepDelay"]*df["TaxiOut"])
       df = df.withColumn("DepDelay_DepTime", df["DepDelay"]*df["DepTime"])
 
@@ -77,7 +83,7 @@ def create_features_vector(df, modelSelected):
     else:
       input_cols = df.columns
       input_cols.remove("ArrDelay")
-      
+
       vectorAssembler = VectorAssembler(inputCols = input_cols, outputCol = "features")
       df = vectorAssembler.transform(df)
 
