@@ -59,3 +59,33 @@ def categoricalToNumerical(df):
     df_types = pipeline.fit(df).transform(df)
     df_types = df_types.drop(*categorical)
     return df
+
+def create_features_vector(df, modelSelected):
+    # You can also change DepDelay for the most correlated var
+    if modelSelected == "SimpleLinearRegression":
+      vectorAssembler = VectorAssembler(inputCols = ["DepDelay"], outputCol = "features")
+      df = vectorAssembler.transform(df)
+
+    else if modelSelected == "MultipleLinearRegressionInteraction":
+      df = df.withColumn("DepDelay_TaxiOut", df["DepDelay"]*df["TaxiOut"])
+      df = df.withColumn("DepDelay_DepTime", df["DepDelay"]*df["DepTime"])
+
+      vectorAssembler = VectorAssembler(inputCols = input_cols, outputCol = "features")
+      df = vectorAssembler.transform(df)
+
+    # Else = for the default/elasticnet/decisiontree models
+    else:
+      input_cols = df.columns
+      input_cols.remove("ArrDelay")
+      
+      vectorAssembler = VectorAssembler(inputCols = input_cols, outputCol = "features")
+      df = vectorAssembler.transform(df)
+
+    return df
+
+
+def split_set(df_features,trainpercent,testpercent):
+    sets = df_features.randomSplit([trainpercent, testpercent])
+    train_set = sets[0]
+    test_set = sets[1]
+    return train_set,test_set
