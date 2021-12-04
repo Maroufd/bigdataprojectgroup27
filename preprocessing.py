@@ -9,6 +9,7 @@ from datetime import datetime
 from pyspark.sql.functions import *
 from pyspark.ml.feature import StringIndexer, VectorAssembler
 from pyspark.ml.feature import VectorAssembler
+from pyspark.ml import Pipeline
 
 def day_of_year(date):
     '''Converts a variable with format 'dd-mm-YYYY' to a number in [1, 365]'''

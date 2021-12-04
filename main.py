@@ -1,3 +1,4 @@
+
 import argparse
 import preprocessing
 import models
@@ -11,7 +12,7 @@ from pyspark.sql.functions import *
 from pyspark.ml.feature import StringIndexer, VectorAssembler
 from pyspark.ml.stat import Correlation
 from pyspark.ml.regression import LinearRegression
-from pyspark import SparkConf
+from pyspark.sql import SparkSession
 
 def run_application(config, *, seed=69, verbose=False):
     """Runs a simulation using dynamic routing.
@@ -26,11 +27,10 @@ def run_application(config, *, seed=69, verbose=False):
     model=config.model
 
     #Load data and the SQL and Spark Context
-    conf=SparkConf()
-    conf.set("spark.executor.memory", "12g")
-    conf.set("spark.driver.memory", "12g")
-    path_to_csv = config.file
-    sc = SparkContext.getOrCreate(conf)
+    path_to_csv = "/job/"+config.file
+    sc = SparkSession.builder.master("local[1]") \
+                        .appName('Bigdatagroup27.com') \
+                        .getOrCreate()
     sqlContext = SQLContext(sc)
     df = sqlContext.read.csv(path_to_csv, header=True)
 
@@ -75,8 +75,7 @@ def run_application(config, *, seed=69, verbose=False):
       trained_model, train_predictions, test_predictions = models.select_LinearRegressionModel(train_set,test_set)
       statistics.print_linear_regression_summary(trained_model)
 
-    statistics.print_training_summary(train_predictions)
-    statistics.print_test_summary(test_predictions)
+    statistics.print_summary(test_predictions)
 
 if __name__ == "__main__":
 
