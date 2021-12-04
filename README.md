@@ -33,5 +33,5 @@ docker build -t spark_app .
 **Run the docker **
 root-dir is your directory until the docker. (for example: /home/project or wind: C:\folder1\folder2)
 ```
-docker run -v {root-dir}/source:/job testspark5:latest /job/main.py
+docker run -v {root-dir}/source:/job sparkapp:latest /job/main.py
 ```
