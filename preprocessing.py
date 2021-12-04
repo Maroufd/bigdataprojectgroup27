@@ -64,7 +64,7 @@ def categoricalToNumerical(df):
     pipeline = Pipeline(stages=indexers)
     df_types = pipeline.fit(df).transform(df)
     df_types = df_types.drop(*categorical)
-    return df
+    return df_types
 
 def create_features_vector(df, modelSelected):
     # You can also change DepDelay for the most correlated var

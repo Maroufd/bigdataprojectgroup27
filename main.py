@@ -11,6 +11,8 @@ from pyspark.sql.functions import *
 from pyspark.ml.feature import StringIndexer, VectorAssembler
 from pyspark.ml.stat import Correlation
 from pyspark.ml.regression import LinearRegression
+from pyspark import SparkConf
+
 def run_application(config, *, seed=69, verbose=False):
     """Runs a simulation using dynamic routing.
     :param config: namespace with the configuration for the run
@@ -24,8 +26,11 @@ def run_application(config, *, seed=69, verbose=False):
     model=config.model
 
     #Load data and the SQL and Spark Context
+    conf=SparkConf()
+    conf.set("spark.executor.memory", "12g")
+    conf.set("spark.driver.memory", "12g")
     path_to_csv = config.file
-    sc = SparkContext.getOrCreate();
+    sc = SparkContext.getOrCreate(conf)
     sqlContext = SQLContext(sc)
     df = sqlContext.read.csv(path_to_csv, header=True)
 
@@ -57,7 +62,7 @@ def run_application(config, *, seed=69, verbose=False):
     df=preprocessing.create_features_vector(df,model)
     df_features = df.select(["features", "ArrDelay"])
     print("train_set----------")
-    train_set,test_set=preprocessing.split_set(df_features,trainsize,testsize)
+    train_set,test_set=preprocessing.split_set(df,trainsize,testsize)
 
     if model=="RegularizedLinearRegression":
       trained_model, train_predictions, test_predictions = models.select_RegularizedLinearRegressionModel(train_set,test_set)
@@ -67,7 +72,7 @@ def run_application(config, *, seed=69, verbose=False):
       trained_model, train_predictions, test_predictions = models.select_DecisionTreeRegressionModel(train_set,test_set)
 
     elif model=="LinearRegression":
-      trained_model, train_predictions, test_predictions = models.LinearRegressionModel(train_set,test_set)
+      trained_model, train_predictions, test_predictions = models.select_LinearRegressionModel(train_set,test_set)
       statistics.print_linear_regression_summary(trained_model)
 
     statistics.print_training_summary(train_predictions)
