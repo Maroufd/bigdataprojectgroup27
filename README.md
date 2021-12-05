@@ -14,6 +14,8 @@ technologies. In this exercise, the students are required to develop a Spark app
 creates a machine learning model for a real-world problem, using real-world data: Predicting the
 arrival delay of commercial flights.
 
+# Data
+[Data Expo 2009: Airline on time data](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/HG7NV7)
 
 # Installation
 We recommend Docker because it works on all operating systems.
@@ -31,7 +33,7 @@ cd bigdataprojectgroup27
 docker build -t spark_app .
 ```
 ### Run the docker
-root-dir is your directory until the docker. (for example: /home/project or wind: C:\folder1\folder2)
 ```
-docker run -v {root-dir}/source:/job spark_app:latest /job/main.py
+docker run -v  $(pwd)/source:/job spark_app:latest /job/main.py --model "RegularizedLinearRegression"
 ```
+[Root Docker](https://hub.docker.com/r/godatadriven/pyspark)
