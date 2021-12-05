@@ -16,23 +16,26 @@ def run_application(config, *, seed=69, verbose=False):
     :param verbose: whether or not to show user output
     """
 
-    file=config.file
+    file="data/"+str(config.file)+".csv.bz2"
     trainsize=config.trainsize
     testsize=config.testsize
     model=config.model
+    if config.analysis=="False":
+        analysis=False
+    else:
+        analysis=True
 
     #Load data and the SQL and Spark Context
 
-    path_to_csv = "/job/"+config.file
     sc = SparkSession.builder.master("local[1]") \
                         .appName('Bigdatagroup27.com') \
                         .getOrCreate()
     sqlContext = SQLContext(sc)
     try:
-        path_to_csv = "/job/"+config.file
+        path_to_csv = "/job/"+file
         df = sqlContext.read.csv(path_to_csv, header=True)
     except:
-        path_to_csv = config.file
+        path_to_csv = file
         df = sqlContext.read.csv(path_to_csv, header=True)
     #Drop the forbidden columns
     df=df.drop("ArrTime", "ActualElapsedTime", "AirTime", "TaxiIn", "Diverted", "CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay")
@@ -46,7 +49,7 @@ def run_application(config, *, seed=69, verbose=False):
     df = df.select([col(c).cast(IntegerType()).alias(c) if c not in with_letters else col(c) for c in df.columns])
 
     #If flag = True: perform the data analysis
-    if config.analysis:
+    if analysis:
          eda.performExploratoryAnalysis(df)
 
     #Data preprocessing
@@ -62,7 +65,7 @@ def run_application(config, *, seed=69, verbose=False):
     #Modeling
     if model=="DecisionTreeRegression":
         df = df.drop("Origin_index", "Dest_index")
-        
+
     df=preprocessing.create_features_vector(df,model)
     df_features = df.select(["features", "ArrDelay"])
     train_set,test_set=preprocessing.split_set(df,trainsize,testsize)
@@ -83,8 +86,8 @@ def run_application(config, *, seed=69, verbose=False):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file", type=str, default="2008.csv.bz2")
-    parser.add_argument("--analysis", default=False, action="store_true")
+    parser.add_argument("--file", type=str, default=2008)
+    parser.add_argument("--analysis", default="False")
     parser.add_argument("--trainsize", type=float, default=0.7)
     parser.add_argument("--testsize", type=float, default=0.3)
     parser.add_argument("--model", type=str, default="LinearRegression")
