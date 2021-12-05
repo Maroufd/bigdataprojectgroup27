@@ -10,7 +10,7 @@ LABEL org.opencontainers.image.title="Apache PySpark $SPARK_VERSION" \
 
 ENV PATH="/opt/miniconda3/bin:${PATH}"
 ENV PYSPARK_PYTHON="/opt/miniconda3/bin/python"
-ENV PYTHONPATH="/job/source"
+ENV PYTHONPATH="/job"
 RUN set -ex && \
 	apt-get update && \
     apt-get install -y curl bzip2 --no-install-recommends && \

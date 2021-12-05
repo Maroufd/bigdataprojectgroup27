@@ -52,7 +52,6 @@ def run_application(config, *, seed=69, verbose=False):
     #Data preprocessing
     df=preprocessing.date_preprocess(df)
     print("1----------")
-    df.show(10)
     df=preprocessing.filter_null(df)
     df.show(10)
     print("2----------")
@@ -75,8 +74,7 @@ def run_application(config, *, seed=69, verbose=False):
       trained_model, train_predictions, test_predictions = models.select_LinearRegressionModel(train_set,test_set)
       statistics.print_linear_regression_summary(trained_model)
 
-    statistics.print_training_summary(train_predictions)
-    statistics.print_test_summary(test_predictions)
+    statistics.print_summary(test_predictions)
 
 if __name__ == "__main__":
 
