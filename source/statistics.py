@@ -21,15 +21,12 @@ def print_linear_regression_summary(linear_model):
     print("** LIST OF REGRESSION COEFFICIENTS **")
     print("- Coefficients: " + str(coefficients))
     print("- Intercept: " + str(intercept))
-
     return coefficients, intercept
 
 def print_summary(df_results):
     evaluator = RegressionEvaluator().setLabelCol("ArrDelay").setPredictionCol("prediction")
     rmse = evaluator.evaluate(df_results, {evaluator.metricName: "rmse"})
     r2 = evaluator.evaluate(df_results, {evaluator.metricName: "r2"})
-    # NOT SURE IF R2ADJ IS AVAILABLE IN THIS EVALUATION (IF NOT, REMOVE IT)
-    r2adj = evaluator.evaluate(df_results, {evaluator.metricName: "r2adj"})
 
     print("- RMSE: ", rmse)
     print("- R2: ", r2)
