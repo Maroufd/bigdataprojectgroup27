@@ -60,6 +60,9 @@ def run_application(config, *, seed=69, verbose=False):
     df=preprocessing.categoricalToNumerical(df)
 
     #Modeling
+    if model=="DecisionTreeRegression":
+        df = df.drop("Origin_index", "Dest_index")
+        
     df=preprocessing.create_features_vector(df,model)
     df_features = df.select(["features", "ArrDelay"])
     train_set,test_set=preprocessing.split_set(df,trainsize,testsize)
