@@ -39,18 +39,14 @@ def filter_null(df):
     #For numerical: mean
     #Fill nulls with mean value of the column excluding variables on list categorical
     categorical = ["TailNum", "UniqueCarrier", "Origin", "Dest"]
-    #stats = df.agg(*(avg(c).alias(c) for c in df.columns if c not in categorical))
-    #withoutNulls = df.na.fill(stats.first().asDict())
+    stats = df.agg(*(avg(c).alias(c) for c in df.columns if c not in categorical))
+    df = df.na.fill(stats.first().asDict())
 
     #For categorical: most common
     for c in categorical:
-        print(c)
         frec = df.groupBy(c).count()
-        print(frec)
         frec= frec.orderBy('count', ascending=False)
-        frec.show()
         mode = frec.first()[c]
-        print(mode)
         df = df.na.fill(value=mode,subset=[c])
 
     return df
@@ -58,7 +54,7 @@ def filter_null(df):
 def categoricalToNumerical(df):
     '''Convert categorical variables to integer
     Input: dataframe
-    Outpu: dataframe'''
+    Output: dataframe'''
 
     categorical = ["TailNum", "UniqueCarrier", "Origin", "Dest"]
     indexers = [StringIndexer(inputCol=c, outputCol=c+"_index").fit(df) for c in df.columns if c in categorical]
@@ -68,6 +64,10 @@ def categoricalToNumerical(df):
     return df_types
 
 def create_features_vector(df, modelSelected):
+    '''Create a column with the feature vector, different according to the model
+    Input: dataframe, string with the name of the model
+    Output: dataframe'''
+    
     # You can also change DepDelay for the most correlated var
     if modelSelected == "SimpleLinearRegression":
       vectorAssembler = VectorAssembler(inputCols = ["DepDelay"], outputCol = "features")
@@ -91,7 +91,11 @@ def create_features_vector(df, modelSelected):
     return df
 
 
-def split_set(df_features,trainpercent,testpercent):
+def split_set(df_features, trainpercent, testpercent):
+    '''Splits a dataframe into train and test, using the percentages trainpercent and testpercent 
+    Input: dataframe, int, int
+    Output: two dataframes'''
+   
     sets = df_features.randomSplit([trainpercent, testpercent])
     train_set = sets[0]
     test_set = sets[1]
