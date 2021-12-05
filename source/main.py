@@ -22,16 +22,18 @@ def run_application(config, *, seed=69, verbose=False):
     model=config.model
 
     #Load data and the SQL and Spark Context
-    try:
-        path_to_csv = "/job/"+config.file
-    except:
-        path_to_csv = config.file
+
+    path_to_csv = "/job/"+config.file
     sc = SparkSession.builder.master("local[1]") \
                         .appName('Bigdatagroup27.com') \
                         .getOrCreate()
     sqlContext = SQLContext(sc)
-    df = sqlContext.read.csv(path_to_csv, header=True)
-
+    try:
+        path_to_csv = "/job/"+config.file
+    except:
+        path_to_csv = config.file
+    finally:
+        df = sqlContext.read.csv(path_to_csv, header=True)
     #Drop the forbidden columns
     df=df.drop("ArrTime", "ActualElapsedTime", "AirTime", "TaxiIn", "Diverted", "CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay")
 
