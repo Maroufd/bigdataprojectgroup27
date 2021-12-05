@@ -5,3 +5,5 @@ services:
       context: tests
       args:
         IMAGE_NAME: ${IMAGE_NAME}
+        logging:
+          driver: none
