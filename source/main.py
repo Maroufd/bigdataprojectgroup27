@@ -1,4 +1,3 @@
-
 import argparse
 import preprocessing
 import models
@@ -7,11 +6,7 @@ import ExploratoryDataAnalysis as eda
 from pyspark import *
 from pyspark.sql.context import SQLContext
 from pyspark.sql.types import IntegerType, DoubleType
-from datetime import datetime
 from pyspark.sql.functions import *
-from pyspark.ml.feature import StringIndexer, VectorAssembler
-from pyspark.ml.stat import Correlation
-from pyspark.ml.regression import LinearRegression
 from pyspark.sql import SparkSession
 
 def run_application(config, *, seed=69, verbose=False):
@@ -36,43 +31,44 @@ def run_application(config, *, seed=69, verbose=False):
 
     #Drop the forbidden columns
     df=df.drop("ArrTime", "ActualElapsedTime", "AirTime", "TaxiIn", "Diverted", "CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay")
-    print("Delete cancelled flies----------")
+
     #Delete cancelled flies
     df=df.filter(df.CancellationCode.isNull()).drop()
-    df=df.drop("Cancelled", "CancellationCode", "FlightNum")
-    print("Correct the types of the variables----------")
+    df=df.drop("Cancelled", "CancellationCode")
+
     #Correct the types of the variables
-    categorical = ["Year", "Month", "DayofMonth", "TailNum", "UniqueCarrier", "Origin", "Dest"]
-    df = df.select([col(c).cast(IntegerType()).alias(c) if c not in categorical else col(c) for c in df.columns])
-    print("Perform analysis----------")
+    with_letters = ["TailNum", "UniqueCarrier", "Origin", "Dest"]
+    df = df.select([col(c).cast(IntegerType()).alias(c) if c not in with_letters else col(c) for c in df.columns])
+
     #If flag = True: perform the data analysis
     if config.analysis:
          eda.performExploratoryAnalysis(df)
-    print("Data preprocessing----------")
+            
     #Data preprocessing
     df=preprocessing.date_preprocess(df)
-    print("1----------")
-    df=preprocessing.filter_null(df)
-    df.show(10)
-    print("2----------")
+    #Drop variables
+    df = df.drop("Date", "Distance", "FlightNum", "CRSElapsedTime", "TailNum", "Year")
+
+    #If there is nulls in target variable (ArrDelay)
+    df = df.na.drop(subset=["ArrDelay"])
+    #df=preprocessing.filter_null(df)
     df=preprocessing.categoricalToNumerical(df)
-    print("Modeling----------")
+    
     #Modeling
     df=preprocessing.create_features_vector(df,model)
     df_features = df.select(["features", "ArrDelay"])
-    print("train_set----------")
     train_set,test_set=preprocessing.split_set(df,trainsize,testsize)
 
     if model=="RegularizedLinearRegression":
-      trained_model, train_predictions, test_predictions = models.select_RegularizedLinearRegressionModel(train_set,test_set)
-      statistics.print_linear_regression_summary(trained_model)
+        trained_model, train_predictions, test_predictions = models.select_RegularizedLinearRegressionModel(train_set,test_set)
+        statistics.print_linear_regression_summary(trained_model)
 
     elif model=="DecisionTreeRegression":
-      trained_model, train_predictions, test_predictions = models.select_DecisionTreeRegressionModel(train_set,test_set)
+        trained_model, train_predictions, test_predictions = models.select_DecisionTreeRegressionModel(train_set,test_set)
 
     elif model=="LinearRegression":
-      trained_model, train_predictions, test_predictions = models.select_LinearRegressionModel(train_set,test_set)
-      statistics.print_linear_regression_summary(trained_model)
+        trained_model, train_predictions, test_predictions = models.select_LinearRegressionModel(train_set,test_set)
+        statistics.print_linear_regression_summary(trained_model)
 
     statistics.print_summary(test_predictions)
 
