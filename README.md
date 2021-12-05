@@ -16,7 +16,7 @@ arrival delay of commercial flights.
 
 # Data
 [Data Expo 2009: Airline on time data](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/HG7NV7)
-
+Put data into source/data/.
 # Installation
 We recommend Docker because it works on all operating systems.
 
