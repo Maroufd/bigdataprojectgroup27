@@ -2,63 +2,43 @@
 # Data exploration file #
 #########################
 
-'''If executed, this file generates a file called 'data_exploration.txt'
-with the exploratory analysis of the data provided'''
+'''If executed, this file generates the exploratory analysis of the data provided'''
 
 from pyspark.sql.functions import *
 from pyspark.mllib.stat import Statistics
 
-def write_table(table, name_of_file):
-  '''Writes a table in a .txt
-  Input: dataframe and string with the name of the file'''
-
-  with open(name_of_file,'a') as f:
-    f.write(" | ".join([col for col in table.columns]) + '\r\n')
-    rows = table.rdd.collect()
-    f.write("\r\n".join([" | ".join(map(str, row)) for row in rows]))
-    f.write("\r\n")
-  f.close()
-
-def write_correlations(table, variable, name_of_file):
-  '''Writes the correlations between variable and the rest of the columns of a dataframe in a .txt
-  Input: dataframe, string with the name of the variable and string with the name of the file'''
-
-  with open(name_of_file,'a') as f:
-    f.write("Correlations:\r\n")
-    for col in table.columns:
-      f.write("Correlation to " + variable + " for " + col + ": " + str(table.stat.corr(variable, col)) + '\r\n')
-  f.close()
-
 def performExploratoryAnalysis(df):
-  '''Performs an exploratory data analysis of df
-  Input: dataframe
-  Output: data_exploration.txt'''
+    '''Performs an exploratory data analysis of df
+    Input: dataframe'''
+    
+    #Exploration of the data base
+    print("DATA EXPLORATION")
+    print("Number of columns: " + str(len(df.columns)))
+    print("Number of rows: " + str(df.count()))
+    print(df.printSchema())
 
-  #Exploration of the data base
-  with open('data_exploration.txt','w') as f:
-    f.write("DATA EXPLORATION" + '\r\n\r\n')
-    f.write("Number of columns: " + str(len(df.columns)) + '\r\n')
-    f.write("Number of rows: " + str(df.count()) + '\r\n\r\n')
-    f.write("Summary of numerical variables:" + '\r\n')
-  f.close()
+    #Exploration of the variables
 
-  #Exploration of the variables
+    #Numerical
+    print("Summary of numerical variables:")
+      
+    #Exploration of the variables
+    categorical = ["Year", "Month", "DayofMonth", "DayOfWeek", "CRSDepTime", "CRSArrTime", "FlightNum", "TailNum", "UniqueCarrier", "Origin", "Dest"]
+    
+    #Numerical
+    numerical = df.drop(*categorical)
+    for col in numerical.columns:
+        numerical.describe(col).show()
 
-  #Numerical
-  categorical = ["Year", "Month", "DayofMonth", "TailNum", "UniqueCarrier", "Origin", "Dest"]
-  numerical = df.drop(*categorical)
-  for col in numerical:
-    desc = numerical.describe(col)
-    write_table(desc, 'data_exploration.txt')
+    #Categorical
+    print("Frecuency Tables of categorical variables:")
+    for col in categorical:
+      df.groupBy(col).count().orderBy('count', ascending=False).show()
 
-  #Categorical
-  with open('data_exploration.txt','a') as f:
-    f.write("\r\n"+ "Frecuency Tables of categorical variables:" + '\r\n')
-  f.close()
-
-  for col in categorical:
-    frec = df.groupBy(col).count().orderBy('count', ascending=False)
-    write_table(frec, 'data_exploration.txt')
-
-  #Correlations
-  write_correlations(numerical, "ArrDelay", 'data_exploration.txt')
+    print("Number of nulls in the columns:")
+    df.select([count(when(isnull(c), c)).alias(c) for c in df.columns]).show()
+    
+    #Correlation
+    print("Correlations:\r\n")
+    for col in numerical.columns:
+      print("Correlation to ArrDelay for " + col + ": " + str(numerical.stat.corr("ArrDelay", col)))
