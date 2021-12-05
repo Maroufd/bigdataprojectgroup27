@@ -22,7 +22,10 @@ def run_application(config, *, seed=69, verbose=False):
     model=config.model
 
     #Load data and the SQL and Spark Context
-    path_to_csv = "/job/"+config.file
+    try:
+        path_to_csv = "/job/"+config.file
+    except:
+        path_to_csv = config.file
     sc = SparkSession.builder.master("local[1]") \
                         .appName('Bigdatagroup27.com') \
                         .getOrCreate()
@@ -43,17 +46,17 @@ def run_application(config, *, seed=69, verbose=False):
     #If flag = True: perform the data analysis
     if config.analysis:
          eda.performExploratoryAnalysis(df)
-            
+
     #Data preprocessing
     df=preprocessing.date_preprocess(df)
     #Drop variables
-    df = df.drop("Date", "Distance", "FlightNum", "CRSElapsedTime", "TailNum", "Year")
+    df = df.drop("Date", "Distance", "FlightNum", "CRSElapsedTime", "TailNum", "CRSDepTime", "CRSArrTime", "Year")
 
     #If there is nulls in target variable (ArrDelay)
     df = df.na.drop(subset=["ArrDelay"])
     #df=preprocessing.filter_null(df)
     df=preprocessing.categoricalToNumerical(df)
-    
+
     #Modeling
     df=preprocessing.create_features_vector(df,model)
     df_features = df.select(["features", "ArrDelay"])
@@ -66,7 +69,7 @@ def run_application(config, *, seed=69, verbose=False):
     elif model=="DecisionTreeRegression":
         trained_model, train_predictions, test_predictions = models.select_DecisionTreeRegressionModel(train_set,test_set)
 
-    elif model=="LinearRegression":
+    else:
         trained_model, train_predictions, test_predictions = models.select_LinearRegressionModel(train_set,test_set)
         statistics.print_linear_regression_summary(trained_model)
 

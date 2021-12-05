@@ -67,7 +67,8 @@ def create_features_vector(df, modelSelected):
     '''Create a column with the feature vector, different according to the model
     Input: dataframe, string with the name of the model
     Output: dataframe'''
-    
+    input_cols = df.columns
+    input_cols.remove("ArrDelay")
     # You can also change DepDelay for the most correlated var
     if modelSelected == "SimpleLinearRegression":
       vectorAssembler = VectorAssembler(inputCols = ["DepDelay"], outputCol = "features")
@@ -82,8 +83,6 @@ def create_features_vector(df, modelSelected):
 
     # Else = for the default/elasticnet/decisiontree models
     else:
-      input_cols = df.columns
-      input_cols.remove("ArrDelay")
 
       vectorAssembler = VectorAssembler(inputCols = input_cols, outputCol = "features")
       df = vectorAssembler.transform(df)
@@ -92,10 +91,10 @@ def create_features_vector(df, modelSelected):
 
 
 def split_set(df_features, trainpercent, testpercent):
-    '''Splits a dataframe into train and test, using the percentages trainpercent and testpercent 
+    '''Splits a dataframe into train and test, using the percentages trainpercent and testpercent
     Input: dataframe, int, int
     Output: two dataframes'''
-   
+
     sets = df_features.randomSplit([trainpercent, testpercent])
     train_set = sets[0]
     test_set = sets[1]
