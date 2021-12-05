@@ -30,9 +30,9 @@ def run_application(config, *, seed=69, verbose=False):
     sqlContext = SQLContext(sc)
     try:
         path_to_csv = "/job/"+config.file
+        df = sqlContext.read.csv(path_to_csv, header=True)
     except:
         path_to_csv = config.file
-    finally:
         df = sqlContext.read.csv(path_to_csv, header=True)
     #Drop the forbidden columns
     df=df.drop("ArrTime", "ActualElapsedTime", "AirTime", "TaxiIn", "Diverted", "CarrierDelay", "WeatherDelay", "NASDelay", "SecurityDelay", "LateAircraftDelay")
