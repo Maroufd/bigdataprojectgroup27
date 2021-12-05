@@ -30,7 +30,7 @@ git clone https://github.com/Maroufd/bigdataprojectgroup27
 cd bigdataprojectgroup27
 docker build -t spark_app .
 ```
-** Run the docker **
+### Run the docker
 root-dir is your directory until the docker. (for example: /home/project or wind: C:\folder1\folder2)
 ```
 docker run -v {root-dir}/source:/job spark_app:latest /job/main.py
