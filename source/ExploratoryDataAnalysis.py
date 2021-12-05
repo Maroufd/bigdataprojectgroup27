@@ -41,4 +41,4 @@ def performExploratoryAnalysis(df):
     #Correlation
     print("Correlations:\r\n")
     for col in numerical.columns:
-      print("Correlation to ArrDelay for " + col + ": " + str(numerical.stat.corr("ArrDelay", col)))
+        print("Correlation to ArrDelay for " + col + ": " + str(numerical.stat.corr("ArrDelay", col)))
