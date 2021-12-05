@@ -30,6 +30,5 @@ def print_summary(df_results):
 
     print("- RMSE: ", rmse)
     print("- R2: ", r2)
-    print("- Adjusted R2 (train): ", r2adj)
 
-    return rmse, r2, r2adj
+    return rmse, r2
